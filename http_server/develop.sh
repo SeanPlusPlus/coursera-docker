@@ -1,0 +1,24 @@
+#!/bin/bash
+source ../.env
+
+CURRENT_DIRECTORY=$(pwd)
+
+docker build \
+--file=$HTTP_SERVER_DOCKERFILE \
+--tag=$HTTP_SERVER_DOCKER_IMAGE_TAG \
+--build-arg HTTP_PORT=$HTTP_SERVER_HTTP_PORT \
+$CURRENT_DIRECTORY
+
+docker create \
+--interactive \
+--tty \
+--rm \
+--name=$HTTP_SERVER_DOCKER_CONTAINER_NAME \
+--publish-all \
+--mount type=bind,source=$CURRENT_DIRECTORY/$HTTP_SERVER_CODE_SOURCE_DIRECTORY,target=$HTTP_SERVER_CODE_TARGET_DIRECTORY \
+--workdir $HTTP_SERVER_CODE_TARGET_DIRECTORY \
+$HTTP_SERVER_DOCKER_IMAGE_TAG
+
+docker start $HTTP_SERVER_DOCKER_CONTAINER_NAME
+docker port $HTTP_SERVER_DOCKER_CONTAINER_NAME
+docker attach $HTTP_SERVER_DOCKER_CONTAINER_NAME

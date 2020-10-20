@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  api:
+    image: ${API_SERVER_DOCKER_IMAGE_NAME}:${API_SERVER_DOCKER_IMAGE_VERSION}
+    container_name: ${API_SERVER_DOCKER_CONTAINER_NAME}
+    build:
+      context: .
+      dockerfile: ./${API_SERVER_DIRECTORY}/${API_SERVER_DOCKERFILE}
+      args:
+        - API_PORT=${API_SERVER_API_PORT}
+    command: ${API_SERVER_STARTUP_COMMAND}
+    volumes:
+      - ./${API_SERVER_DIRECTORY}/${API_SERVER_CODE_SOURCE_DIRECTORY}:${API_SERVER_CODE_TARGET_DIRECTORY}
+
+  web:
+    image: ${HTTP_SERVER_DOCKER_IMAGE_NAME}:${HTTP_SERVER_DOCKER_IMAGE_VERSION}
+    container_name: ${HTTP_SERVER_DOCKER_CONTAINER_NAME}
+    build:
+      context: .
+      dockerfile: ./${HTTP_SERVER_DIRECTORY}/${HTTP_SERVER_DOCKERFILE}
+      args:
+        - HTTP_PORT=${HTTP_SERVER_HTTP_PORT}
+    environment:
+      - API_SERVER_URL=http://api:${API_SERVER_API_PORT}
+    ports:
+      - ${HTTP_SERVER_HOST_HTTP_PORT}:${HTTP_SERVER_HTTP_PORT}
+    command: ${HTTP_SERVER_CODE_TARGET_DIRECTORY}/${HTTP_SERVER_STARTUP_COMMAND}
+    volumes:
+      - ./${HTTP_SERVER_DIRECTORY}/${HTTP_SERVER_CODE_SOURCE_DIRECTORY}:${HTTP_SERVER_CODE_TARGET_DIRECTORY}

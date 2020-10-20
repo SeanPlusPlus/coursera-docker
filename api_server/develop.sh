@@ -1,0 +1,24 @@
+#!/bin/bash
+source ../.env
+
+CURRENT_DIRECTORY=$(pwd)
+
+docker build \
+--file=$API_SERVER_DOCKERFILE \
+--tag=$API_SERVER_DOCKER_IMAGE_TAG \
+--build-arg API_PORT=$API_SERVER_API_PORT \
+$CURRENT_DIRECTORY
+
+docker create \
+--interactive \
+--tty \
+--rm \
+--name=$API_SERVER_DOCKER_CONTAINER_NAME \
+--publish-all \
+--mount type=bind,source=$CURRENT_DIRECTORY/$API_SERVER_CODE_SOURCE_DIRECTORY,target=$API_SERVER_CODE_TARGET_DIRECTORY \
+--workdir $API_SERVER_CODE_TARGET_DIRECTORY \
+$API_SERVER_DOCKER_IMAGE_TAG
+
+docker start $API_SERVER_DOCKER_CONTAINER_NAME
+docker port $API_SERVER_DOCKER_CONTAINER_NAME
+docker attach $API_SERVER_DOCKER_CONTAINER_NAME
